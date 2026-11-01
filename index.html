@@ -460,16 +460,13 @@ function startGame() {
 // Erstellt eine zufällige Mischung aus Feed-Behauptungen und Familien-Events
 function buildGameQueue() {
     gameQueue = [];
-    // Wir nehmen z.B. 8 Stationen pro Spieldurchlauf
     for (let i = 0; i < 8; i++) {
-        // Zufällig entscheiden: Entweder ein Feed-Post oder eine Familiennachricht
         let type = Math.random() < 0.6 ? "feed" : "family";
         if (type === "feed") {
             let randomPost = feedPool[Math.floor(Math.random() * feedPool.length)];
             gameQueue.push({ type: "feed", data: randomPost });
         } else {
             let randomFamily = familyPool[Math.floor(Math.random() * familyPool.length)];
-            // Ersetze [NAME] im Text durch den Spielernamen
             let clonedFamily = { ...randomFamily };
             clonedFamily.text = clonedFamily.text.replace("[NAME]", playerName);
             gameQueue.push({ type: "family", data: clonedFamily });
@@ -505,24 +502,16 @@ function makeFeedChoice(choice) {
     let post = activeItem.data;
 
     if (choice === "report") {
-        // Richtige Entscheidung bei Fakes, oder kritisch bei echten
-        if (post.isFake) {
-            // Richtig erkannt! Kein Fehler.
-        } else {
-            // Echte Nachricht gemeldet -> kleiner Fehler (übervorsichtig)
+        if (!post.isFake) {
             errorCount += 0.5;
         }
     } else if (choice === "share") {
-        // Glauben & Teilen
         if (post.isFake) {
-            // Auf Fake reingefallen! Voller Fehler.
             errorCount += 1.5;
         } else {
-            // Echte Nachricht geteilt -> okay, aber vielleicht unreflektiert
             errorCount += 0.5;
         }
     } else {
-        // Ignorieren -> Neutral
         errorCount += 0.5;
     }
 
@@ -569,7 +558,7 @@ function showChatModal(famData) {
     let optionsContainer = document.getElementById("chat-options");
     optionsContainer.innerHTML = "";
 
-    famData.options.forEach((opt, index) => {
+    famData.options.forEach((opt) => {
         let btn = document.createElement("button");
         btn.className = "btn btn-secondary";
         btn.innerText = opt.text;
@@ -587,7 +576,7 @@ function handleChatChoice(errorAdd) {
     loadNextStep();
 }
 
-// ENDBILDSCHIRM (Die 5 Enden)
+// ENDBILDSCHIRM
 function showEndScreen() {
     document.getElementById("game-screen").classList.add("hidden");
     document.getElementById("end-screen").classList.remove("hidden");
@@ -598,27 +587,22 @@ function showEndScreen() {
     let emoji = "🎉";
 
     if (errorCount <= 0.5) {
-        // Ende 1: Perfekt
         title = "Der unerschütterliche Faktenchecker";
         text = "Besser hätte man es nicht machen können. Du überlegst und prüfst erst alles, bevor du dem Gesagtem Glauben schenkst. Du bist sicher.";
         emoji = "🎉";
     } else if (errorCount <= 2) {
-        // Ende 2: Sehr gut
         title = "Gut aufgeklärt";
         text = "Gut gemacht! Du hast ein paar wenige Fehler gemacht, aber macht nichts. Frag einfach nochmal nach einer zweiten Meinung.";
         emoji = "😊";
     } else if (errorCount <= 4) {
-        // Ende 3: Solide / Mittelfeld
         title = "Gerade noch so die Kurve gekriegt";
         text = "Gerade noch so die Kurve gekriegt. Das nächste Mal vielleicht einfach weiter scrollen?";
         emoji = "🤔";
     } else if (errorCount <= 6.5) {
-        // Ende 4: Knapp vor dem Totalabsturz
         title = "Gefährliches Halbwissen";
         text = "Du bist im Netz nicht sicher. Bitte informiere dich, bevor du das nächste Mal etwas teilst.";
         emoji = "😢";
     } else {
-        // Ende 5: Totalverlust / Extrem verkackt
         title = "Voll in der Falle";
         text = "Was machst du da? Hast du es überhaupt versucht? Bitte lösch deine Social Media Accounts.";
         emoji = "😡";
@@ -628,4 +612,4 @@ function showEndScreen() {
     document.getElementById("end-text").innerText = text;
     document.getElementById("end-emoji").innerText = emoji;
 }
-      
+        
